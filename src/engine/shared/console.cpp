@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
+#include <iostream>
 
 #include <base/math.h>
 #include <base/system.h>
@@ -11,6 +12,7 @@
 #include "config.h"
 #include "console.h"
 #include "linereader.h"
+#include <sstream>
 
 // todo: rework this
 
@@ -247,6 +249,8 @@ void CConsole::SetPrintOutputLevel(int Index, int OutputLevel)
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, bool Highlighted)
 {
 	dbg_msg(pFrom ,"%s", pStr);
+	std::ostream& out = *GetOutputStream();
+	out << pFrom << ": " << pStr << std::endl;
 	for(int i = 0; i < m_NumPrintCB; ++i)
 	{
 		if(Level <= m_aPrintCB[i].m_OutputLevel && m_aPrintCB[i].m_pfnPrintCallback)

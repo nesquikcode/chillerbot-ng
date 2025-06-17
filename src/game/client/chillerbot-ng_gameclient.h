@@ -39,12 +39,21 @@ void CGameClient::StartInputThread(int mode)
 void ConsoleKeyInputThread(void *pArg)
 {
 #if defined(CONF_FAMILY_UNIX)
-	system("stty sane");
+    int stty_result = system("stty sane");
+    if(stty_result != 0) {
+        fprintf(stderr, "Failed to reset terminal settings (stty sane)\n");
+    }
 #endif
-	m_aThreadInputBuf[0] = 0;
-	fgets(m_aThreadInputBuf, sizeof(m_aThreadInputBuf), stdin);
-	m_ThreadInpState = THREAD_INPUT_DONE;
-	SaneTTY = true;
+
+    m_aThreadInputBuf[0] = '\0';
+    
+    if(fgets(m_aThreadInputBuf, sizeof(m_aThreadInputBuf), stdin) == NULL) {
+        // Обработка ошибки ввода
+        m_aThreadInputBuf[0] = '\0';
+    }
+
+    m_ThreadInpState = THREAD_INPUT_DONE;
+    SaneTTY = true;
 }
 
 void CGameClient::ShowServerList()

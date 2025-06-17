@@ -361,7 +361,10 @@ int CClient::SendMsgEx(CMsgPacker *pMsg, int Flags, bool System)
 void CClient::SendInfo()
 {
 	CMsgPacker Msg(NETMSG_INFO);
-	Msg.AddString(GameClient()->NetVersion(), 128);
+
+	//Msg.AddInt(GameClient()->DDNetVersion());
+	//Msg.AddString(GameClient()->DDNetVersionStr(), 0);
+	Msg.AddString(GameClient()->NetVersion(), 0);
 	Msg.AddString(m_Password, 128);
 	SendMsgEx(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH);
 }
@@ -640,14 +643,14 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	str_copy(g_Config.m_DbgStressServer, pAddress, sizeof(g_Config.m_DbgStressServer));
 
 	str_format(aBuf, sizeof(aBuf), "connecting to '%s'", m_aServerAddressStr);
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddbot/client", aBuf);
 
 	ServerInfoRequest();
 	if(net_host_lookup(m_aServerAddressStr, &m_ServerAddress, m_NetClient[0].NetType()) != 0)
 	{
 		char aBufMsg[256];
 		str_format(aBufMsg, sizeof(aBufMsg), "could not find the address of %s, connecting to localhost", aBuf);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBufMsg);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddbot/client", aBufMsg);
 		net_host_lookup("localhost", &m_ServerAddress, m_NetClient[0].NetType());
 	}
 
@@ -675,7 +678,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "disconnecting. reason='%s'", pReason?pReason:"unknown");
-	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddbot/client", aBuf);
 
 	// stop demo playback and recorder
 	m_DemoPlayer.Stop();

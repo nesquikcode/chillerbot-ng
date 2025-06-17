@@ -223,9 +223,13 @@ public:
 	virtual void OnDummySwap() = 0;
 	virtual void SendDummyInfo(bool Start) = 0;
 
-	virtual const char *GetItemName(int Type) = 0;
-	virtual const char *Version() = 0;
-	virtual const char *NetVersion() = 0;
+	virtual const char *GetItemName(int Type) const = 0;
+	virtual const char *Version() const = 0;
+	virtual const char *NetVersion() const = 0;
+	virtual const char *NetVersion7() const = 0;
+	virtual int DDNetVersion() const = 0;
+	virtual const char *DDNetVersionStr() const = 0;
+	virtual int ClientVersion7() const = 0;
 
 	virtual void OnDummyDisconnect() = 0;
 };

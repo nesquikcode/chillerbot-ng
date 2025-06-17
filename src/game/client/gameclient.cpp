@@ -55,15 +55,10 @@
 #include "components/statboard.h"
 #include "components/voting.h"
 
-#include "components/chillerbot/chathelper.h"
-#include "components/chillerbot/chillerbotux.h"
-#include "components/chillerbot/chillpw.h"
-#include "components/chillerbot/remotecontrol.h"
-
 #include <base/system.h>
 #include "components/race_demo.h"
 #include "components/ghost.h"
-
+ 
 #ifdef _WIN32
 	#include <conio.h>
 #endif // _WIN32
@@ -72,7 +67,9 @@
 #if defined(CONF_PLATFORM_MACOSX)
 #include <curses.h>
 #endif
-#include "chillerbot-ng_gameclient.h"
+
+// ddbot
+#include "components/ddbot-http/httpserver.h"
 
 CGameClient g_GameClient;
 
@@ -111,18 +108,18 @@ static CBackground gs_BackGround;
 static CRaceDemo gs_RaceDemo;
 static CGhost gs_Ghost;
 
-
-static CChillerBotUX gs_ChillerBotUX;
-static CChatHelper gs_ChatHelper;
-static CChillPw gs_ChillPw;
-static CRemoteControl gs_RemoteControl;
+static HttpServer DDBotAPI_server(7070);
 
 CGameClient::CStack::CStack() { m_Num = 0; }
 void CGameClient::CStack::Add(class CComponent *pComponent) { m_paComponents[m_Num++] = pComponent; }
 
-const char *CGameClient::Version() { return GAME_VERSION; }
-const char *CGameClient::NetVersion() { return GAME_NETVERSION; }
-const char *CGameClient::GetItemName(int Type) { return m_NetObjHandler.GetObjName(Type); }
+const char *CGameClient::Version() const { return GAME_VERSION; }
+const char *CGameClient::NetVersion() const { return GAME_NETVERSION; }
+const char *CGameClient::NetVersion7() const { return GAME_NETVERSION7; }
+int CGameClient::DDNetVersion() const { return DDNET_VERSION_NUMBER; }
+const char *CGameClient::DDNetVersionStr() const { return m_aDDNetVersionStr; }
+int CGameClient::ClientVersion7() const { return CLIENT_VERSION7; }
+const char *CGameClient::GetItemName(int Type) const { return m_NetObjHandler.GetObjName(Type); }
 
 void CGameClient::OnConsoleInit()
 {
@@ -166,9 +163,6 @@ void CGameClient::OnConsoleInit()
 	m_pRaceDemo = &::gs_RaceDemo;
 	m_pGhost = &::gs_Ghost;
 
-	m_pChillerBotUX = &::gs_ChillerBotUX;
-	m_pChatHelper = &::gs_ChatHelper;
-
 	gs_NamePlates.SetPlayers(m_pPlayers);
 
 	// make a list of all the systems, make sure to add them in the correct render order
@@ -182,11 +176,6 @@ void CGameClient::OnConsoleInit()
 	m_All.Add(m_pVoting);
 	m_All.Add(m_pParticles); // doesn't render anything, just updates all the particles
 	m_All.Add(m_pRaceDemo);
-
-	m_All.Add(m_pChillerBotUX);
-	m_All.Add(m_pChatHelper);
-	m_All.Add(&gs_ChillPw);
-	m_All.Add(&gs_RemoteControl);
 
 	m_All.Add(&gs_BackGround);	//render instead of gs_MapLayersBackGround when g_Config.m_ClOverlayEntities == 100
 	m_All.Add(&gs_MapLayersBackGround); // first to render
@@ -341,15 +330,19 @@ void CGameClient::OnInit()
 				g_Config.m_ClDummyTimeoutCode[i] = (char)((rand() % 26) + 65);
 		}
 	}
+	if(GIT_SHORTREV_HASH)
+	{
+		str_format(m_aDDNetVersionStr, sizeof(m_aDDNetVersionStr), "%s %s (%s)", GAME_NAME, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH);
+	}
+	else
+	{
+		str_format(m_aDDNetVersionStr, sizeof(m_aDDNetVersionStr), "%s %s", GAME_NAME, GAME_RELEASE_VERSION);
+	}
 
-	// chillerbot-ng
+	DDBotAPI_server.start(this);
 
-	m_RequestCmdlist = 0;
-	m_EnterGameTime = 0;
-
-	int64 End = time_get();
-	str_format(aBuf, sizeof(aBuf), "initialisation finished after %.2fms", ((End-Start)*1000)/(float)time_freq());
-	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "gameclient", aBuf);
+	Console()->Print(1, "ddbot","DDBot Client [v." DDBOT_VERSION "]");
+	Console()->Print(1, "ddbot", "by @neqry, with love <3");
 }
 
 void CGameClient::OnUpdate()
@@ -479,7 +472,7 @@ void CGameClient::OnConnected()
 	// we should keep this in for now, because otherwise you can't spectate
 	// people at start as the other info 64 packet is only sent after the first
 	// snap
-	Client()->Rcon("crashmeplx");
+	// Client()->Rcon("crashmeplx");
 }
 
 void CGameClient::OnReset()
@@ -608,9 +601,6 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick)
 
 void CGameClient::OnRender()
 {
-	// chillerbot-ng
-	ChillerBotTick();
-
 	// update the local character and spectate position
 	UpdatePositions();
 
@@ -871,6 +861,7 @@ void CGameClient::OnShutdown()
 {
 	m_pRaceDemo->OnReset();
 	m_pGhost->OnReset();
+	DDBotAPI_server.stop();
 }
 
 void CGameClient::OnEnterGame()

@@ -97,7 +97,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   src/game/version.h
 )
 
-set(CLIENT_EXECUTABLE chillerbot-ng CACHE STRING "Name of the build client executable")
+set(CLIENT_EXECUTABLE ddbot CACHE STRING "Name of the build client executable")
 
 ########################################################################
 # Compiler flags
@@ -713,7 +713,6 @@ if(CLIENT)
   set_glob(GAME_CLIENT GLOB_RECURSE src/game/client
     animstate.cpp
     animstate.h
-    chillerbot-ng_gameclient.h
     component.h
     components/background.cpp
     components/background.h
@@ -725,16 +724,6 @@ if(CLIENT)
     components/camera.h
     components/chat.cpp
     components/chat.h
-    components/chillerbot/chatcommands.h
-    components/chillerbot/chathelper.cpp
-    components/chillerbot/chathelper.h
-    components/chillerbot/chillerbotux.cpp
-    components/chillerbot/chillerbotux.h
-    components/chillerbot/chillpw.cpp
-    components/chillerbot/chillpw.h
-    components/chillerbot/remotecontrol.cpp
-    components/chillerbot/remotecontrol.h
-    components/chillerbot/version.h
     components/console.cpp
     components/console.h
     components/controls.cpp
@@ -789,6 +778,8 @@ if(CLIENT)
     components/statboard.h
     components/voting.cpp
     components/voting.h
+    components/ddbot-http/httpserver.cpp
+    components/ddbot-http/httpserver.h
     gameclient.cpp
     gameclient.h
     lineinput.cpp

@@ -83,7 +83,7 @@ class CGameClient : public IGameClient
 
 	CStack m_All;
 	CStack m_Input;
-	CNetObjHandler m_NetObjHandler;
+	mutable CNetObjHandler m_NetObjHandler;
 
 	class IEngine *m_pEngine;
 	class IInput *m_pInput;
@@ -317,9 +317,14 @@ public:
 	void OnWindowResize();
 	static void OnWindowResizeCB(void *pUser);
 
-	virtual const char *GetItemName(int Type);
-	virtual const char *Version();
-	virtual const char *NetVersion();
+	const char *GetItemName(int Type) const;
+	const char *Version() const override;
+	const char *NetVersion() const override;
+	const char *NetVersion7() const override;
+	int DDNetVersion() const override;
+	const char *DDNetVersionStr() const override;
+	virtual int ClientVersion7() const override;
+	char m_aDDNetVersionStr[64];
 
 	// actions
 	// TODO: move these

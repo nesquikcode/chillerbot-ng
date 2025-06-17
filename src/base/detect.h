@@ -2,7 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef BASE_DETECT_H
 #define BASE_DETECT_H
-
+#define STRINGIFY2(x) #x
+#define STRINGIFY(x) STRINGIFY2(x)
 /*
 	this file detected the family, platform and architecture
 	to compile for.

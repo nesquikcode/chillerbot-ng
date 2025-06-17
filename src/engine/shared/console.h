@@ -7,9 +7,12 @@
 #include <engine/storage.h>
 #include <base/math.h>
 #include "memheap.h"
+#include <string>
+#include <sstream>
 
 class CConsole : public IConsole
 {
+	std::stringstream m_OutStream;
 	class CCommand : public CCommandInfo
 	{
 	public:
@@ -214,6 +217,11 @@ public:
 
 	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);
 	void SetFlagMask(int FlagMask) { m_FlagMask = FlagMask; }
+
+	// ddbot: доступ к out
+    std::stringstream* GetOutputStream() override {
+        return &m_OutStream;
+    }
 };
 
 #endif

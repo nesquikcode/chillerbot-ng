@@ -5,6 +5,8 @@
 
 #include <engine/storage.h>
 #include "kernel.h"
+#include <sstream>
+#include <string>
 
 class IConsole : public IInterface
 {
@@ -107,6 +109,10 @@ public:
 
 	bool m_Cheated;
 	virtual void SetFlagMask(int FlagMask) = 0;
+
+	// ddbot: для записи логов в переменную и послежующем чтении и отправке при /_/output
+    virtual std::stringstream* GetOutputStream() = 0;
+
 };
 
 extern IConsole *CreateConsole(int FlagMask);
